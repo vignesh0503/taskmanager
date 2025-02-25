@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { BGS, formatDate, PRIOTITYSTYELS, TASK_TYPE } from "../../utils";
 import Button from "../Button";
 import UserInfo from "../UserInfo";
+import ConfirmationDialog from "../Dialogs";
 
 const ICONS = {
   high: <MdKeyboardDoubleArrowUp />,
@@ -22,6 +23,13 @@ const ICONS = {
 const Table = ({ tasks }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selected, setSelected] = useState(null);
+
+  const deleteClicks = (id) => {
+    setSelected(id);
+    setOpenDialog(true);
+  };
+
+  const deleteHandler = () => {};
 
   const TableHeader = () => (
     <thead className="border-b border-gray-300">
@@ -125,6 +133,14 @@ const Table = ({ tasks }) => {
           </table>
         </div>
       </div>
+
+      {/* TODO */}
+
+      <ConfirmationDialog
+        open={openDialog}
+        setOpen={setOpenDialog}
+        onClick={deleteHandler}
+      />
     </>
   );
 };
