@@ -4,10 +4,13 @@ import { useForm } from "react-hook-form";
 import Textbox from "../components/Textbox";
 import Button from "../components/Button";
 import { useDispatch, useSelector } from "react-redux";
+import { useLoginMutation } from "../redux/slices/api/authApiSlice";
+import { toast } from "sonner";
+import { setCredentials } from "../redux/slices/authSlice";
+import Loading from "../components/Loader";
 
 const Login = () => {
   const { user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -15,47 +18,60 @@ const Login = () => {
   } = useForm();
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // const submitHandler = async (data) => {
-  //   console.log("submit");
-  // };
-  // console.log(user);
-
-  // useEffect(() => {
-  //   user && navigate("/dashboard");
-  // }, [user]);
+  const [login, { isLoading }] = useLoginMutation();
 
   const submitHandler = async (data) => {
     try {
-      // Fetch stored user from local storage
-      const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+      const result = await login(data).unwrap();
 
-      if (!storedUser) {
-        alert("User not found. Please register.");
-        return;
-      }
-      if (
-        storedUser.email === data.email &&
-        storedUser.passWord === data.password
-      ) {
-        // Save user in Redux state (Assuming you have a Redux action)
-        dispatch({ type: "LOGIN_SUCCESS", payload: storedUser });
-        navigate("/dashboard");
-      } else {
-        alert("Invalid Email or Password");
-      }
+      dispatch(setCredentials(result));
+      navigate("/");
+      // console.log("result", result);
     } catch (error) {
-      console.error("Login failed:", error);
+      console.log(error);
+
+      toast.error(error?.data?.message || error.message);
     }
   };
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+  console.log(user);
 
-    if (storedUser) {
-      dispatch({ type: "LOGIN_SUCCESS", payload: storedUser }); // Update Redux state
-      navigate("/dashboard"); // Redirect
-    }
-  }, [navigate, dispatch]);
+  useEffect(() => {
+    user && navigate("/dashboard");
+  }, [user]);
+
+  // const submitHandler = async (data) => {
+  //   try {
+  //     // Fetch stored user from local storage
+  //     const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+
+  //     if (!storedUser) {
+  //       alert("User not found. Please register.");
+  //       return;
+  //     }
+  //     if (
+  //       storedUser.email === data.email &&
+  //       storedUser.passWord === data.password
+  //     ) {
+  //       // Save user in Redux state (Assuming you have a Redux action)
+  //       dispatch({ type: "LOGIN_SUCCESS", payload: storedUser });
+  //       navigate("/dashboard");
+  //     } else {
+  //       alert("Invalid Email or Password");
+  //     }
+  //   } catch (error) {
+  //     console.error("Login failed:", error);
+  //   }
+  // };
+  // useEffect(() => {
+  //   const storedUser = JSON.parse(localStorage.getItem("user"));
+
+  //   if (storedUser) {
+  //     dispatch({ type: "LOGIN_SUCCESS", payload: storedUser }); // Update Redux state
+  //     navigate("/dashboard"); // Redirect
+  //   }
+  // }, [navigate, dispatch]);
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center flex-col lg:flex-row bg-[#f3f4f6]">
@@ -117,11 +133,15 @@ const Login = () => {
               <span className="text-sm text-gray-500 hover:text-blue-600 hover:underline cursor-pointer">
                 Forgot Password?
               </span>
-              <Button
-                type="submit"
-                label="submit"
-                className="w-full h-10 bg-blue-700 text-white rounded-full"
-              />
+              {isLoading ? (
+                <Loading />
+              ) : (
+                <Button
+                  type="submit"
+                  label="submit"
+                  className="w-full h-10 bg-blue-700 text-white rounded-full"
+                />
+              )}
             </div>
           </form>
         </div>

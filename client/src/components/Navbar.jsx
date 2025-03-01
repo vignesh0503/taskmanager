@@ -3,7 +3,7 @@ import { MdOutlineSearch } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { IoMdMenu } from "react-icons/io";
-import { setOpenSidebar } from "../slices/authSlice";
+import { setOpenSidebar } from "../redux/slices/authSlice";
 import UserAvatar from "./UserAvatar";
 import NotificationPanel from "./NotificationPanel";
 

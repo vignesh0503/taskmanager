@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import { Fragment, useRef } from "react";
-import { setOpenSidebar } from "./slices/authSlice";
+import { setOpenSidebar } from "./redux/slices/authSlice";
 import { Transition } from "@headlessui/react";
 import clsx from "clsx";
 import { IoClose } from "react-icons/io5";
