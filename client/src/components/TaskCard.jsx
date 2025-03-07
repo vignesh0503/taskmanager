@@ -61,7 +61,7 @@ const TaskCard = ({ task }) => {
             </div>
             <div className="flex gap-1 items-center text-sm text-gray-600">
               <MdAttachFile />
-              <span>{task?.assests?.length}</span>
+              <span>{task?.assets?.length}</span>
             </div>
             <div className="flex gap-1 items-center text-sm text-gray-600">
               <FaList />
@@ -112,7 +112,7 @@ const TaskCard = ({ task }) => {
           <button
             onClick={() => setOpen(true)}
             disabled={user.isAdmin ? false : true}
-            className="w-full flex gap=4 items-center text-sm text-gray-500 font-semibold disabled:cursor-not-allowed disabled::text-gray-300"
+            className="w-full flex gap-4 items-center text-sm text-gray-500 font-semibold disabled:cursor-not-allowed disabled::text-gray-300"
           >
             <IoMdAdd className="text-lg" />
             <span>ADD SUBTASK</span>
@@ -120,7 +120,7 @@ const TaskCard = ({ task }) => {
         </div>
       </div>
 
-      <AddSubTask open={open} setOpen={setOpen} id={task._id} />
+      <AddSubTask open={open} setOpen={setOpen} id={task?._id} />
     </>
   );
 };

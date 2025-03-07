@@ -33,14 +33,13 @@ const Users = () => {
 
       refetch();
       toast.success(result.data.message);
-
       setSelected(null);
       setTimeout(() => {
         setOpenAction(false);
       }, 500);
     } catch (error) {
-      console.log(error);
-      toast.error(error?.data?.message || error.error);
+      console.log(err);
+      toast.error(err?.data?.message || err.error);
     }
   };
   const deleteHandler = async () => {
@@ -72,7 +71,7 @@ const Users = () => {
 
   const userStatusClick = (el) => {
     setSelected(el);
-    setOpen(true);
+    setOpenAction(true);
   };
 
   const TableHeader = () => (
@@ -93,9 +92,10 @@ const Users = () => {
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm bg-blue-700">
             <span className="text-xs md:text-sm text-center">
-              {getInitials(user.name)}
+              {getInitials(user?.name)}
             </span>
           </div>
+          {user.name}
         </div>
       </td>
       <td className="p-2">{user.title}</td>

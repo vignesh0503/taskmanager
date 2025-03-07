@@ -15,6 +15,9 @@ import Charts from "../components/Charts";
 import { BGS, getInitials, PRIOTITYSTYELS, TASK_TYPE } from "../utils";
 import UserInfo from "../components/UserInfo";
 
+import Loading from "../components/Loader";
+import { useGetDashboardStatsQuery } from "../redux/slices/api/taskApiSlice";
+
 const TaskTable = ({ tasks }) => {
   const ICONS = {
     high: <MdKeyboardDoubleArrowUp />,
@@ -146,13 +149,23 @@ const UserTable = ({ users }) => {
   );
 };
 const Dashboard = () => {
-  const totals = summary.tasks;
+  const { data, isLoading } = useGetDashboardStatsQuery();
 
+  if (isLoading)
+    return (
+      <div className="py-10">
+        <Loading />
+      </div>
+    );
+  console.log("API Response:", data);
+
+  // const totals = data;
+  const totals = data || {};
   const stats = [
     {
       _id: "1",
       label: "TOTAL TASK",
-      total: summary?.totalTasks || 0,
+      total: data?.totalTasks || 0,
       icon: <FaNewspaper />,
       bg: "bg-[#1d4ed8]",
     },
@@ -211,13 +224,13 @@ const Dashboard = () => {
         <h4 className="text-xl text-gray-600 font-semibold">
           Chart by Priority
         </h4>
-        <Charts />
+        <Charts data={data?.graphData} />
       </div>
 
       <div className="w-full flex flex-col md:flex-row gap-4 2xl:gap-10 py-8">
-        <TaskTable tasks={summary.last10Task} />
+        <TaskTable tasks={data?.last10Task} />
 
-        <UserTable users={summary.users} />
+        <UserTable users={data?.users} />
       </div>
     </div>
   );

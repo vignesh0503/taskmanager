@@ -24,6 +24,8 @@ const AddUser = ({ open, setOpen, userData }) => {
     formState: { errors },
   } = useForm({ defaultValues });
 
+  
+
   const [addNewUser, { isLoading }] = useRegisterMutation();
   const [updateuser, { isLoading: isUpdating }] = useUpdateuserMutation();
 
@@ -34,10 +36,10 @@ const AddUser = ({ open, setOpen, userData }) => {
 
         toast.success(result?.message);
         if (userData?._id === user?._id) {
-          dispatch(setCredentials({...result.user}));
+          dispatch(setCredentials({ ...result.user }));
         }
       } else {
-        const result = await addNewUser({
+        await addNewUser({
           ...data,
           password: data.email,
         }).unwrap();
@@ -62,15 +64,15 @@ const AddUser = ({ open, setOpen, userData }) => {
           </Dialog.Title>
           <div className="mt-2 flex flex-col gap-6">
             <Textbox
-              placeholder="Full Name"
+              placeholder="Full name"
               type="text"
               name="name"
               label="Full Name"
               className="w-full rounded"
               register={register("name", {
-                required: "Full Name is Required!",
+                required: "Full name is required!",
               })}
-              error={errors.name ? errors.name.message : ""}
+              error={errors.user ? errors.name.message : ""}
             />
             <Textbox
               placeholder="Title"

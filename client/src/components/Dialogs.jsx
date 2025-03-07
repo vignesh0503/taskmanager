@@ -96,7 +96,7 @@ export function UserAction({ open, setOpen, onClick = () => {} }) {
 
             <Button
               type="button"
-              className="bg-white px-8 text-sm font-semibold text-white sm:w-auto border"
+              className="bg-white px-8 text-sm font-semibold text-gray-900 sm:w-auto border"
               onClick={() => closeDialog()}
               label="No"
             />

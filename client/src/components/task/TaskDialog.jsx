@@ -9,6 +9,11 @@ import { Menu, Transition } from "@headlessui/react";
 import AddTask from "./AddTask";
 import AddSubTask from "./AddSubTask";
 import ConfirmationDialog from "../Dialogs";
+import {
+  useDuplicateTaskMutation,
+  useTrashTaskMutation,
+} from "../../redux/slices/api/taskApiSlice";
+import { toast } from "sonner";
 
 const TaskDialog = ({ task }) => {
   const [open, setOpen] = useState(false);
@@ -16,10 +21,44 @@ const TaskDialog = ({ task }) => {
   const [openDialog, setOpenDialog] = useState(false);
 
   const navigate = useNavigate();
+  const [deleteTask] = useTrashTaskMutation();
+  const [duplicateTask] = useDuplicateTaskMutation();
 
-  const duplicateHandler = () => {};
-  const deleteClicks = () => {};
-  const deleteHandler = () => {};
+  const duplicateHandler = async () => {
+    try {
+      const res = await duplicateTask(task._id).unwrap();
+
+      toast.success(res?.message);
+
+      setTimeout(() => {
+        setOpenDialog(false);
+        window.location.reload();
+      }, 500);
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.data?.message || err.error);
+    }
+  };
+  const deleteClicks = () => {
+    setOpenDialog(true);
+  };
+  const deleteHandler = async () => {
+    try {
+      const res = await deleteTask({
+        id: task._id,
+        isTrashed: "trash",
+      }).unwrap();
+
+      toast.success(res?.message);
+      setTimeout(() => {
+        setOpenDialog(false);
+        window.location.reload();
+      }, 500);
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.data?.message || err.error);
+    }
+  };
 
   const items = [
     {
@@ -79,6 +118,25 @@ const TaskDialog = ({ task }) => {
                   </Menu.Item>
                 ))}
               </div>
+
+              <div className="px-1 py-1">
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => deleteClicks()}
+                      className={`${
+                        active ? "bg-blue-500 text-white" : "text-red-900"
+                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                    >
+                      <RiDeleteBin6Line
+                        className="mr-2 h-5 w-5 text-red-400"
+                        aria-hidden="true"
+                      />
+                      Delete
+                    </button>
+                  )}
+                </Menu.Item>
+              </div>
             </Menu.Items>
           </Transition>
         </Menu>
@@ -90,7 +148,7 @@ const TaskDialog = ({ task }) => {
         task={task}
         key={new Date().getTime()}
       />
-      <AddSubTask open={open} setOpen={setOpen} />
+      <AddSubTask open={open} setOpen={setOpen} id={task?._id} />
 
       <ConfirmationDialog
         open={openDialog}

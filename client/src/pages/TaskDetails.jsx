@@ -17,8 +17,13 @@ import { toast } from "sonner";
 import { tasks } from "../assets/data";
 import Tabs from "../components/Tabs";
 import { getInitials, PRIOTITYSTYELS, TASK_TYPE } from "../utils";
-import { Button } from "@headlessui/react";
+// import { Button } from "@headlessui/react";
 import Loading from "../components/Loader";
+import {
+  useGetSingleTaskQuery,
+  usePostTaskActivityMutation,
+} from "../redux/slices/api/taskApiSlice";
+import Button from "../components/Button";
 
 const assets = [
   "https://images.pexels.com/photos/2418664/pexels-photo-2418664.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -88,8 +93,21 @@ const act_types = [
 
 const TaskDetails = () => {
   const { id } = useParams();
+  const { data, isLoading, refetch } = useGetSingleTaskQuery(id);
+
   const [selected, setSelected] = useState(0);
-  const task = tasks[3];
+
+  const task = data?.task || {};
+
+  console.log(data);
+
+  if (isLoading)
+    return (
+      <div className="py-10">
+        <Loading />
+      </div>
+    );
+
   return (
     <div className="w-full flex flex-col gap-3 mb-4 overflow-y-hidden">
       <h1 className="text-2xl text-gray-600 font-bold">{task?.title}</h1>
@@ -210,26 +228,53 @@ const TaskDetails = () => {
           </>
         ) : (
           <>
-            <Activities activity={task?.activities} id={id} />
+            <Activities
+              activity={data?.task?.activities}
+              id={id}
+              refetch={refetch}
+            />
           </>
         )}
       </Tabs>
     </div>
   );
 };
-const Activities = ({ activity, id }) => {
+const Activities = ({ activity, id, refetch }) => {
   const [selected, setSelected] = useState(act_types[0]);
   const [text, setText] = useState("");
-  const isLoading = false;
+  // const isLoading = false;
 
-  const handleSubmit=async()=>{}
+  const [postActivity, { isLoading }] = usePostTaskActivityMutation();
+  const handleSubmit = async () => {
+    try {
+      const activityData = {
+        type: selected.toLowerCase(),
+        activity: text,
+      };
+      const result = await postActivity({
+        data: activityData,
+        id,
+      }).unwrap();
+      console.log(result);
+
+      setText("");
+      toast.success(result?.message);
+      refetch();
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message || error.error);
+    }
+  };
 
   const Card = ({ item }) => {
+    console.log("Full Activity Item:", activity);
+    console.log("Activity Type:", activity?.type);
+
     return (
       <div className="flex space-x-4">
         <div className="flex flex-col items-center flex-shrink-0">
           <div className="w-10 h-10 flex items-center justify-center">
-            {TASKTYPEICON[item?.type]}
+            {TASKTYPEICON[item?.type?.toLowerCase()] || <FaTasks />}
           </div>
           <div className="w-full flex items-center">
             <div className="w-0.5 bg-gray-300 h-full"></div>
@@ -257,7 +302,7 @@ const Activities = ({ activity, id }) => {
             <Card
               key={index}
               item={el}
-              isConnected={index < activity.length - 1}
+              isConnected={index < activity?.length - 1}
             />
           ))}
         </div>
@@ -272,8 +317,8 @@ const Activities = ({ activity, id }) => {
               <input
                 type="checkbox"
                 className="w-4 h-4 "
-                checked={selected === item ? true : false}
-                onChange={(e) => setSelected(item)}
+                checked={selected === item.toLowerCase()}
+                onChange={(e) => setSelected(item.toLowerCase())}
               />
               <p>{item}</p>
             </div>

@@ -5,15 +5,17 @@ import { BsChevronExpand } from "react-icons/bs";
 import { MdCheck } from "react-icons/md";
 import clsx from "clsx";
 import { getInitials } from "../../utils";
+import { useGetTeamListQuery } from "../../redux/slices/api/userApiSlice";
 
 const UserList = ({ setTeam, team }) => {
-  const data = summary.users;
-  const [selectedUsers, setSlectedUsers] = useState([data[0]]);
+  const { data, isLoading } = useGetTeamListQuery();
+  const [selectedUsers, setSlectedUsers] = useState([]);
 
   const handleChange = (el) => {
     setSlectedUsers(el);
     setTeam(el.map((u) => u._id));
   };
+
 
   useEffect(() => {
     if (team?.length < 1) {
@@ -21,7 +23,7 @@ const UserList = ({ setTeam, team }) => {
     } else {
       setSlectedUsers(team);
     }
-  }, []);
+  }, [isLoading]);
 
   return (
     <div>
