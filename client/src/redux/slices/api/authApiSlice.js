@@ -11,6 +11,19 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
         credentials: "include",
       }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // ✅ Save User + Token in Redux + LocalStorage
+          dispatch(setCredentials(data));
+
+          // ✅ Reload the Page (Optional)
+          window.location.href = "/dashboard";
+        } catch (error) {
+          console.error("Login Failed", error);
+        }
+      },
     }),
 
     register: builder.mutation({
@@ -28,6 +41,17 @@ export const authApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         credentials: "include",
       }),
+      async onQueryStarted(arg, { dispatch }) {
+        try {
+          // ✅ Clear Token + User from Redux
+          dispatch(logout());
+
+          // ✅ Redirect to Login Page
+          window.location.href = "/login";
+        } catch (error) {
+          console.error("Logout Failed", error);
+        }
+      },
     }),
   }),
 });
