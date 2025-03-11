@@ -8,10 +8,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        target:
-          process.env.NODE_ENV === "production"
-            ? "https://task-manager-aoao.onrender.com"
-            : "http://localhost:8800",
+        target: import.meta.env.VITE_APP_BASE_URL,
         changeOrigin: true,
         secure: false,
         credentials: "include",

@@ -1,31 +1,29 @@
-// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// // const API_URI = "http://localhost:8000/api";
-// const API_URI = import.meta.env.VITE_APP_BASE_URL;
+// Using environment variable from .env file
+const API_URI = import.meta.env.VITE_APP_BASE_URL;
 
-// const baseQuery = fetchBaseQuery({
-//   baseUrl: API_URI + "/api",
-//   credentials: "include",
-//   prepareHeaders: (headers) => {
-//     const token = localStorage.getItem("token");
+const baseQuery = fetchBaseQuery({
+  baseUrl: API_URI + "/api",
+  credentials: "include",
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem("token");
 
-//     if (token) {
-//       headers.set("Authorization", `Bearer ${token}`);
-//     }
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
 
-//     return headers;
-//   },
-// });
+    return headers;
+  },
+});
 
-// export const apiSlice = createApi({
-//   baseQuery,
-//   tagTypes: [],
-//   endpoints: (builder) => ({}),
-// });
+export const apiSlice = createApi({
+  baseQuery,
+  tagTypes: [],
+  endpoints: (builder) => ({}),
+});
 
 // >>>>>>>>>>>>>
-
-
 
 // import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -48,26 +46,23 @@
 //   endpoints: (builder) => ({}),
 // });
 
-
-
-
 // >>>>>>>>>>>>
 
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const API_URI = import.meta.env.VITE_APP_BASE_URL;
+// const API_URI = import.meta.env.VITE_APP_BASE_URL;
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: `${API_URI}/api`,
-  credentials: "include", // ✅ This sends the HTTPOnly cookie with each request
-  prepareHeaders: (headers) => {
-    headers.set("Content-Type", "application/json");
-    return headers;
-  },
-});
+// const baseQuery = fetchBaseQuery({
+//   baseUrl: `${API_URI}/api`,
+//   credentials: "include", // ✅ This sends the HTTPOnly cookie with each request
+//   prepareHeaders: (headers) => {
+//     headers.set("Content-Type", "application/json");
+//     return headers;
+//   },
+// });
 
-export const apiSlice = createApi({
-  baseQuery,
-  tagTypes: [],
-  endpoints: (builder) => ({}),
-});
+// export const apiSlice = createApi({
+//   baseQuery,
+//   tagTypes: [],
+//   endpoints: (builder) => ({}),
+// });
