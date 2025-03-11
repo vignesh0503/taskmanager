@@ -8,7 +8,10 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        target: import.meta.env.VITE_APP_BASE_URL,
+        target:
+          process.env.NODE_ENV === "production"
+            ? process.env.VITE_APP_BASE_URL
+            : "http://localhost:8800",
         changeOrigin: true,
         secure: false,
         credentials: "include",
