@@ -60,6 +60,7 @@ export const loginUser = async (req, res) => {
     const isMatch = await user.matchPassword(password);
     if (user && isMatch) {
       createJWT(res, user._id);
+      createRefreshToken(res, user._id);
 
       user.password = undefined;
 
@@ -76,10 +77,16 @@ export const loginUser = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
   try {
-    res.cookie("token", "", {
-      htttpOnly: true,
-      expires: new Date(0),
-    });
+      res.cookie("token", "", {
+        httpOnly: true,
+        expires: new Date(0),
+      });
+
+      res.cookie("refreshToken", "", {
+        httpOnly: true,
+        expires: new Date(0),
+      });
+
 
     res.status(200).json({ message: "Logout successful" });
   } catch (err) {
@@ -87,6 +94,28 @@ export const logoutUser = async (req, res) => {
   }
 };
 
+
+export const refreshToken = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  jwt.verify(
+    refreshToken,
+    process.env.JWT_REFRESH_SECRET,
+    async (err, decoded) => {
+      if (err) return res.status(403).json({ message: "Forbidden" });
+
+      const user = await User.findById(decoded.id);
+      if (!user) return res.status(403).json({ message: "User not found" });
+
+      createJWT(res, user._id);
+      res.status(200).json({ message: "Token refreshed" });
+    }
+  );
+};
 export const getTeamList = async (req, res) => {
   try {
     const users = await User.find().select("name title role email isActive");
