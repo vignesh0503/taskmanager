@@ -67,7 +67,6 @@ const NotificationPanel = () => {
     refetch();
   };
 
-
   const viewHandler = async (el) => {
     setSelected(el);
     readHandler("one", el._id);
