@@ -67,16 +67,28 @@ export const loginUser = async (req, res) => {
 
     const isMatch = await user.matchPassword(password);
     if (user && isMatch) {
-      createJWT(res, user._id);
-      user.password = undefined;
-      return res.status(200).json(user);
+      // ✅ Generate JWT Token
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "7d",
+      });
+
+      return res.status(200).json({
+        _id: user._id,
+        name: user.name,
+        title: user.title,
+        role: user.role,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isActive: user.isActive,
+        token, // ✅ Include the token
+      });
     } else {
       return res
         .status(401)
         .json({ status: false, message: "Invalid email or password" });
     }
   } catch (err) {
-    console.error("Login Error:", err); // ✅ Debugging line
+    console.error("Login Error:", err);
     return res.status(400).json({ status: false, message: err.message });
   }
 };
