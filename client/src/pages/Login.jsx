@@ -6,8 +6,8 @@ import Button from "../components/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { useLoginMutation } from "../redux/slices/api/authApiSlice";
 import { toast } from "sonner";
-import { setCredentials } from "../redux/slices/authSlice";
 import Loading from "../components/Loader";
+import { setCredentials } from "../redux/slices/authSlice";
 
 const Login = () => {
   const { user } = useSelector((state) => state.auth);
