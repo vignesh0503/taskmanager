@@ -18,12 +18,13 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://merntask-task-manager.netlify.app/",
+      "https://merntask-task-manager.netlify.app",
       "http://localhost:3000",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Set-Cookie"],
   })
 );
 
