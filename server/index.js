@@ -18,7 +18,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://endearing-crumble-ed3bc6.netlify.app",
+      "https://mernstack-taskmanager.netlify.app",
       "http://localhost:3000",
     ],
     credentials: true,

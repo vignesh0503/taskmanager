@@ -16,9 +16,11 @@ export const authApiSlice = apiSlice.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data));
+          console.log("Login Successful:", data);
           window.location.href = "/dashboard";
         } catch (error) {
           console.error("Login Failed", error);
+          alert("Login failed. Please check your credentials.");
         }
       },
     }),
@@ -38,9 +40,11 @@ export const authApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         credentials: "include",
       }),
-      async onQueryStarted(arg, { dispatch }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
+           await queryFulfilled;
           dispatch(logout()); // ✅ Now logout is defined
+          console.log("Logout successful");
           window.location.href = "/login";
         } catch (error) {
           console.error("Logout Failed", error);
