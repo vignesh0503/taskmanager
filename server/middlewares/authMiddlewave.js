@@ -3,27 +3,27 @@ import User from "../models/user.js";
 
 const protectRoute = async (req, res, next) => {
   try {
-    let token = req.cookies?.token;
+    let token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
 
-    if (token) {
-      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-
-      const resp = await User.findById(decodedToken.userId).select(
-        "isAdmin email"
-      );
-
-      req.user = {
-        email: resp.email,
-        isAdmin: resp.isAdmin,
-        userId: decodedToken.userId,
-      };
-
-      next();
-    } else {
+    if (!token) {
       return res
         .status(401)
         .json({ status: false, message: "Not authorized. Try login again." });
     }
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    const resp = await User.findById(decodedToken.userId).select(
+      "isAdmin email"
+    );
+
+    req.user = {
+      email: resp.email,
+      isAdmin: resp.isAdmin,
+      userId: decodedToken.userId,
+    };
+
+    next();
   } catch (error) {
     console.error(error);
     return res

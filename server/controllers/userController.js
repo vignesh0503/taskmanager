@@ -1,6 +1,7 @@
 import Notice from "../models/notification.js";
 import User from "../models/user.js";
-import { createJWT } from "../utils/index.js";
+import jwt from "jsonwebtoken";
+import { createJWT, createRefreshToken } from "../utils/index.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -8,10 +9,9 @@ export const registerUser = async (req, res) => {
 
     const userExist = await User.findOne({ email });
     if (userExist) {
-      return res.status(400).json({
-        status: false,
-        message: "User already exists",
-      });
+      return res
+        .status(400)
+        .json({ status: false, message: "User already exists" });
     }
 
     const user = await User.create({
@@ -24,7 +24,7 @@ export const registerUser = async (req, res) => {
     });
 
     if (user) {
-      isAdmin ? createJWT(res, user._id) : null;
+      if (isAdmin) createJWT(res, user._id);
       user.password = undefined;
 
       res.status(201).json(user);
@@ -44,32 +44,24 @@ export const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return res
         .status(401)
-        .json({ status: false, message: "Invalid email or password." });
-    }
-
-    if (!user?.isActive) {
-      return res.status(401).json({
-        status: false,
-        message: "User account has been deactivated, contact the administrator",
-      });
+        .json({ status: false, message: "Invalid email or account inactive." });
     }
 
     const isMatch = await user.matchPassword(password);
-    if (user && isMatch) {
-      createJWT(res, user._id);
-      createRefreshToken(res, user._id);
-
-      user.password = undefined;
-
-      res.status(200).json(user);
-    } else {
+    if (!isMatch) {
       return res
         .status(401)
         .json({ status: false, message: "Invalid email or password" });
     }
+
+    createJWT(res, user._id);
+    createRefreshToken(res, user._id);
+
+    user.password = undefined;
+    res.status(200).json(user);
   } catch (err) {
     return res.status(400).json({ status: false, message: err.message });
   }
@@ -77,23 +69,14 @@ export const loginUser = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
   try {
-      res.cookie("token", "", {
-        httpOnly: true,
-        expires: new Date(0),
-      });
-
-      res.cookie("refreshToken", "", {
-        httpOnly: true,
-        expires: new Date(0),
-      });
-
+    res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
+    res.cookie("refreshToken", "", { httpOnly: true, expires: new Date(0) });
 
     res.status(200).json({ message: "Logout successful" });
   } catch (err) {
     return res.status(400).json({ status: false, message: err.message });
   }
 };
-
 
 export const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
@@ -108,7 +91,7 @@ export const refreshToken = async (req, res) => {
     async (err, decoded) => {
       if (err) return res.status(403).json({ message: "Forbidden" });
 
-      const user = await User.findById(decoded.id);
+      const user = await User.findById(decoded.userId);
       if (!user) return res.status(403).json({ message: "User not found" });
 
       createJWT(res, user._id);
@@ -116,6 +99,7 @@ export const refreshToken = async (req, res) => {
     }
   );
 };
+
 export const getTeamList = async (req, res) => {
   try {
     const users = await User.find().select("name title role email isActive");
@@ -135,7 +119,7 @@ export const getNotificationsList = async (req, res) => {
       isRead: { $nin: [userId] },
     }).populate("task", "title");
 
-    res.status(201).json(notice);
+    res.status(200).json(notice);
   } catch (err) {
     return res.status(400).json({ status: false, message: err.message });
   }
@@ -144,36 +128,29 @@ export const getNotificationsList = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
   try {
     const { userId, isAdmin } = req.user;
-    const { _id } = req.body;
+    const { _id, name, title, role } = req.body;
 
-    const id =
-      isAdmin && userId === _id
-        ? userId
-        : isAdmin && userId !== _id
-        ? _id
-        : userId;
+    const id = isAdmin && userId !== _id ? _id : userId;
 
     const user = await User.findById(id);
+    if (!user)
+      return res.status(404).json({ status: false, message: "User not found" });
 
-    if (user) {
-      user.name = req.body.name || user.name;
-      user.title = req.body.title || user.title;
-      user.role = req.body.role || user.role;
+    user.name = name || user.name;
+    user.title = title || user.title;
+    user.role = role || user.role;
 
-      const updatedUser = await user.save();
+    const updatedUser = await user.save();
+    updatedUser.password = undefined;
 
-      user.password = undefined;
-
-      res.status(201).json({
+    res
+      .status(200)
+      .json({
         status: true,
         message: "Profile Updated Successfully.",
         user: updatedUser,
       });
-    } else {
-      res.status(404).json({ status: false, message: "User not found" });
-    }
   } catch (error) {
-    console.log(error);
     return res.status(400).json({ status: false, message: error.message });
   }
 };
@@ -181,26 +158,18 @@ export const updateUserProfile = async (req, res) => {
 export const markNotificationRead = async (req, res) => {
   try {
     const { userId } = req.user;
-
     const { isReadType, id } = req.query;
 
-    if (isReadType === "all") {
-      await Notice.updateMany(
-        { team: userId, isRead: { $nin: [userId] } },
-        { $push: { isRead: userId } },
-        { new: true }
-      );
-    } else {
-      await Notice.findOneAndUpdate(
-        { _id: id, isRead: { $nin: [userId] } },
-        { $push: { isRead: userId } },
-        { new: true }
-      );
-    }
+    const update = { $push: { isRead: userId } };
+    const filter =
+      isReadType === "all"
+        ? { team: userId, isRead: { $nin: [userId] } }
+        : { _id: id, isRead: { $nin: [userId] } };
 
-    res.status(201).json({ status: true, message: "Done" });
+    await Notice.updateMany(filter, update);
+
+    res.status(200).json({ status: true, message: "Notifications updated" });
   } catch (error) {
-    console.log(error);
     return res.status(400).json({ status: false, message: error.message });
   }
 };
@@ -208,25 +177,18 @@ export const markNotificationRead = async (req, res) => {
 export const changeUserPassword = async (req, res) => {
   try {
     const { userId } = req.user;
-
     const user = await User.findById(userId);
 
-    if (user) {
-      user.password = req.body.password;
+    if (!user)
+      return res.status(404).json({ status: false, message: "User not found" });
 
-      await user.save();
+    user.password = req.body.password;
+    await user.save();
 
-      user.password = undefined;
-
-      res.status(201).json({
-        status: true,
-        message: `Password chnaged successfully.`,
-      });
-    } else {
-      res.status(404).json({ status: false, message: "User not found" });
-    }
+    res
+      .status(200)
+      .json({ status: true, message: "Password changed successfully." });
   } catch (error) {
-    console.log(error);
     return res.status(400).json({ status: false, message: error.message });
   }
 };
@@ -234,25 +196,23 @@ export const changeUserPassword = async (req, res) => {
 export const activateUserProfile = async (req, res) => {
   try {
     const { id } = req.params;
-
     const user = await User.findById(id);
 
-    if (user) {
-      user.isActive = req.body.isActive; //!user.isActive
+    if (!user)
+      return res.status(404).json({ status: false, message: "User not found" });
 
-      await user.save();
+    user.isActive = req.body.isActive;
+    await user.save();
 
-      res.status(201).json({
+    res
+      .status(200)
+      .json({
         status: true,
         message: `User account has been ${
-          user?.isActive ? "activated" : "disabled"
+          user.isActive ? "activated" : "disabled"
         }`,
       });
-    } else {
-      res.status(404).json({ status: false, message: "User not found" });
-    }
   } catch (error) {
-    console.log(error);
     return res.status(400).json({ status: false, message: error.message });
   }
 };
@@ -260,14 +220,15 @@ export const activateUserProfile = async (req, res) => {
 export const deleteUserProfile = async (req, res) => {
   try {
     const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
 
-    await User.findByIdAndDelete(id);
+    if (!user)
+      return res.status(404).json({ status: false, message: "User not found" });
 
     res
       .status(200)
       .json({ status: true, message: "User deleted successfully" });
   } catch (error) {
-    console.log(error);
     return res.status(400).json({ status: false, message: error.message });
   }
 };
