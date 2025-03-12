@@ -3,15 +3,11 @@ import mongoose from "mongoose";
 
 const dbConnection = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGODB_URI);
 
-    console.log("Database connected successfully");
+    console.log("DB connection established");
   } catch (error) {
-    console.error("Database connection error:", error);
-    process.exit(1); // Exit process if DB connection fails
+    console.log("DB Error: " + error);
   }
 };
 
@@ -19,15 +15,14 @@ export default dbConnection;
 
 export const createJWT = (res, userId) => {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "1d",
   });
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "Lax", // Lax for better usability
-    maxAge: 60 * 60 * 1000, // 1 hour
+    secure: process.env.NODE_ENV !== "development",
+    // sameSite: "none",
+    sameSite: "strict",
+    maxAge: 1 * 24 * 60 * 60 * 1000, //1 day
   });
 };
-
-

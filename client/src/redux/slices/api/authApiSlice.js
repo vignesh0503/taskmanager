@@ -1,4 +1,5 @@
 import { apiSlice } from "../apiSlice";
+import { logout, setCredentials } from "../authSlice"; // ✅ Import logout
 
 const AUTH_URL = "/user";
 
@@ -14,11 +15,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-
-          // ✅ Save User + Token in Redux + LocalStorage
           dispatch(setCredentials(data));
-
-          // ✅ Reload the Page (Optional)
           window.location.href = "/dashboard";
         } catch (error) {
           console.error("Login Failed", error);
@@ -36,17 +33,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
     }),
 
     logout: builder.mutation({
-      query: (data) => ({
+      query: () => ({
         url: `${AUTH_URL}/logout`,
         method: "POST",
         credentials: "include",
       }),
       async onQueryStarted(arg, { dispatch }) {
         try {
-          // ✅ Clear Token + User from Redux
-          dispatch(logout());
-
-          // ✅ Redirect to Login Page
+          dispatch(logout()); // ✅ Now logout is defined
           window.location.href = "/login";
         } catch (error) {
           console.error("Logout Failed", error);
@@ -56,4 +50,5 @@ export const authApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation , useLogoutMutation} = authApiSlice;
+export const { useLoginMutation, useRegisterMutation, useLogoutMutation } =
+  authApiSlice;
