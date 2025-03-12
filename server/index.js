@@ -18,7 +18,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://merntask-taskmanager.netlify.app",
+      "https://merntask-task-manager.netlify.app/",
       "http://localhost:3000",
     ],
     credentials: true,
