@@ -15,16 +15,16 @@ const PORT = process.env.PORT || 5000;
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:3000", // Allow local development
+  "https://merntask-task-manager.netlify.app", // Allow production frontend
+];
+
 app.use(
   cors({
-    origin: [
-      "https://merntask-task-manager.netlify.app",
-      "http://localhost:3000",
-    ],
-    credentials: true,
+    origin: allowedOrigins,
+    credentials: true, // Allow cookies & auth headers
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Set-Cookie"],
   })
 );
 
