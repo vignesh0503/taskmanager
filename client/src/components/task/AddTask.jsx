@@ -65,6 +65,7 @@ const AddTask = ({ open, setOpen, task }) => {
           body: formData,
         }
       );
+      console.log(import.meta.env.VITE_APP_BASE_URL);
 
       if (!uploadRes.ok) {
         throw new Error("File upload failed");

@@ -9,25 +9,16 @@ const upload = multer({ storage });
 
 export const uploadFile = async (req, res) => {
   try {
-    if (!gridfsBucket) {
-      return res.status(500).json({ message: "GridFS is not initialized" });
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const { originalname, buffer } = req.file;
-
-    // Convert Buffer to Stream and Upload to GridFS
-    const uploadStream = gridfsBucket.openUploadStream(originalname);
-    uploadStream.end(buffer);
-
-    uploadStream.on("finish", () => {
-      res.status(201).json({
-        message: "File uploaded successfully",
-        fileId: uploadStream.id,
-        filename: originalname,
-      });
-    });
+    res
+      .status(200)
+      .json({ message: "File uploaded successfully", file: req.file });
   } catch (error) {
-    res.status(500).json({ message: "File upload failed", error });
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "File upload failed" });
   }
 };
 
