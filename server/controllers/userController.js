@@ -39,12 +39,15 @@ export const registerUser = async (req, res) => {
 };
 
 export const loginUser = async (req, res) => {
+  console.log("loginUser function triggered!");
   try {
-    console.log("Login Request Body:", req.body);
+    console.log("Login Request Received");
+    console.log("Request Body:", req.body);
 
     const { email, password } = req.body;
 
     if (!email || !password) {
+      console.log("Missing Email or Password");
       return res
         .status(400)
         .json({ status: false, message: "Missing email or password" });

@@ -2,16 +2,19 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 
 const protectRoute = async (req, res, next) => {
+  console.log("Checking for token...");
   try {
     let token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
+       console.log("No token found. Unauthorized.");
       return res
         .status(401)
         .json({ status: false, message: "Not authorized. Try login again." });
     }
-
+ console.log("Token found. Verifying...");
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded Token:", decodedToken);
 
     const resp = await User.findById(decodedToken.userId).select(
       "isAdmin email"

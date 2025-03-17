@@ -6,20 +6,29 @@ const AUTH_URL = "/user";
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
-      query: (data) => ({
-        url: `${AUTH_URL}/login`,
-        method: "POST",
-        body: data,
-        credentials: "include",
-      }),
+      query: (data) => {
+        console.log("Sending Login Request:", data); // ✅ Debugging
+        return {
+          url: `${AUTH_URL}/login`,
+          method: "POST",
+          body: data,
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json", // ✅ Ensure JSON format
+          },
+        };
+      },
+
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          console.log("Login Successful:", data);
           dispatch(setCredentials(data));
           console.log("Login Successful:", data);
           window.location.href = "/dashboard";
         } catch (error) {
-          console.error("Login Failed", error);
+          console.error("Login Failed:", error);
+          console.log("Server Response:", error?.error?.data || error);
           alert("Login failed. Please check your credentials.");
         }
       },
@@ -42,7 +51,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-           await queryFulfilled;
+          await queryFulfilled;
           dispatch(logout()); // ✅ Now logout is defined
           console.log("Logout successful");
           window.location.href = "/login";

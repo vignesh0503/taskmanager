@@ -24,18 +24,19 @@ const Login = () => {
 
   const submitHandler = async (data) => {
     try {
+      console.log("Login Data:", data);
       const result = await login(data).unwrap();
-
+      console.log("Login Response:", result);
       dispatch(setCredentials(result));
       navigate("/");
       // console.log("result", result);
     } catch (error) {
-      console.log(error);
+      console.log("Login Error:", error);
 
       toast.error(error?.data?.message || error.message);
     }
   };
-  console.log(user);
+  console.log("user", user);
 
   useEffect(() => {
     user && navigate("/dashboard");
