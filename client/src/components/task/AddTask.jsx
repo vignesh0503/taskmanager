@@ -59,7 +59,8 @@ const AddTask = ({ open, setOpen, task }) => {
 
       // Upload images to backend
       const uploadRes = await fetch(
-        `${import.meta.env.VITE_APP_BASE_URL}/upload`,
+        // `${import.meta.env.VITE_APP_BASE_URL}/upload`,
+        `${import.meta.env.VITE_APP_BASE_URL}/api/upload`,
         {
           method: "POST",
           body: formData,
@@ -71,12 +72,12 @@ const AddTask = ({ open, setOpen, task }) => {
         throw new Error("File upload failed");
       }
 
-      // const { urls } = await uploadRes.json(); // Get uploaded file URLs
-      const { fileId, filename } = await uploadRes.json();
+      const { urls } = await uploadRes.json(); // Get uploaded file URLs
+
       const newData = {
         ...data,
-        // assets: [...(task?.assets || []), ...urls], // Save image URLs in MongoDB
-        assets: [...(task?.assets || []), fileId],
+        assets: [...(task?.assets || []), ...urls], // Save image URLs in MongoDB
+
         team,
         stage,
         priority,
