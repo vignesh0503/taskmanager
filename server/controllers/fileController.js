@@ -13,9 +13,20 @@ export const uploadFile = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    res
-      .status(200)
-      .json({ message: "File uploaded successfully", file: req.file });
+    const fileUrl = `${
+      process.env.BASE_URL || "https://taskmanager-cmk3.onrender.com"
+    }/api/file/${req.file.filename}`;
+
+    console.log(
+      "✅ Sending Response:",
+      JSON.stringify({ message: "File uploaded successfully", urls: [fileUrl] })
+    );
+
+    res.setHeader("Content-Type", "application/json"); // Ensure response is JSON
+    res.json({
+      message: "File uploaded successfully",
+      urls: [fileUrl],
+    });
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({ message: "File upload failed" });
@@ -24,16 +35,15 @@ export const uploadFile = async (req, res) => {
 
 export const getFile = async (req, res) => {
   try {
-    if (!gridfsBucket) {
-      return res.status(500).json({ message: "GridFS is not initialized" });
+    const file = await gfs.find({ filename: req.params.filename }).toArray();
+    if (!file || file.length === 0) {
+      return res.status(404).json({ message: "File not found" });
     }
 
-    const fileId = new mongoose.Types.ObjectId(req.params.id);
-    const downloadStream = gridfsBucket.openDownloadStream(fileId);
-
-    res.set("Content-Type", "image/png"); // Adjust based on file type
-    downloadStream.pipe(res);
+    res.set("Content-Type", file[0].contentType);
+    gridfsBucket.openDownloadStreamByName(req.params.filename).pipe(res);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching file", error });
+    console.error(error);
+    res.status(500).json({ message: "Error retrieving file" });
   }
 };
