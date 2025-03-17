@@ -18,13 +18,12 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://mernstack-taskmanager.netlify.app",
-      "http://localhost:3000",
+      "http://localhost:3000", // Allow local development
+      "https://mernstack-taskmanager.netlify.app", // Allow deployed frontend
     ],
-    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Set-Cookie"],
+    credentials: true, // Allow cookies/auth headers
   })
 );
 
