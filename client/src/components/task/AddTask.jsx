@@ -46,17 +46,16 @@ const AddTask = ({ open, setOpen, task }) => {
   const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
 
   const handleSelect = (e) => {
-    setAssets(Array.from(e.target.files)); // Store selected files
+    setAssets(e.target.files); // Store selected files
   };
 
   const submitHandler = async (data) => {
     setUploading(true);
     try {
       const formData = new FormData();
-      // for (const file of assets) {
-      //   formData.append("files", file);
-      // }
-      assets.forEach((file) => formData.append("files", file));
+      for (const file of assets) {
+        formData.append("file", file);
+      }
 
       // Upload images to backend
       const uploadRes = await fetch(
@@ -67,11 +66,12 @@ const AddTask = ({ open, setOpen, task }) => {
         }
       );
 
-      const { urls } = await uploadRes.json(); // Get uploaded file URLs
-
+      // const { urls } = await uploadRes.json(); // Get uploaded file URLs
+      const { fileId, filename } = await uploadRes.json();
       const newData = {
         ...data,
-        assets: [...(task?.assets || []), ...urls], // Save image URLs in MongoDB
+        // assets: [...(task?.assets || []), ...urls], // Save image URLs in MongoDB
+        assets: [...(task?.assets || []), fileId],
         team,
         stage,
         priority,
