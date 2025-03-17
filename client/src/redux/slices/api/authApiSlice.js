@@ -1,5 +1,5 @@
 import { apiSlice } from "../apiSlice";
-import { logout, setCredentials } from "../authSlice"; //Import logout
+import { logout, setCredentials } from "../authSlice"; //  Import logout
 
 const AUTH_URL = "/user";
 
@@ -14,7 +14,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
           body: data,
           credentials: "include",
           headers: {
-            "Content-Type": "application/json", // Ensure JSON format
+            "Content-Type": "application/json", //  Ensure JSON format
           },
         };
       },
@@ -28,7 +28,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
           window.location.href = "/dashboard";
         } catch (error) {
           console.error("Login Failed:", error);
-          console.log("Server Response:", error?.error?.data || error);
+          console.log(" Server Response:", error?.error?.data || error);
           alert("Login failed. Please check your credentials.");
         }
       },
@@ -52,7 +52,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          dispatch(logout()); // ✅ Now logout is defined
+          dispatch(logout()); // Now logout is defined
           console.log("Logout successful");
           window.location.href = "/login";
         } catch (error) {

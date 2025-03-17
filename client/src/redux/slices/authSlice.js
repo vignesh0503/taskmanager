@@ -1,11 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-// import { user } from "../assets/data";
 
 const initialState = {
   user: localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo"))
+    ? JSON.parse(localStorage.getItem("userInfo") ?? "{}")
     : null,
-  token: localStorage.getItem("token") ? localStorage.getItem("token") : null,
+  token: localStorage.getItem("token") ?? null,
   isSidebarOpen: false,
 };
 
@@ -20,11 +19,11 @@ const authSlice = createSlice({
       localStorage.setItem("userInfo", JSON.stringify(action.payload));
       localStorage.setItem("token", action.payload.token);
     },
-    logout: (state, action) => {
-     state.user = null;
-     state.token = null;
-     localStorage.removeItem("userInfo");
-     localStorage.removeItem("token");
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("token");
     },
     setOpenSidebar: (state, action) => {
       state.isSidebarOpen = action.payload;
@@ -32,6 +31,6 @@ const authSlice = createSlice({
   },
 });
 
+// Export actions and reducer
 export const { setCredentials, logout, setOpenSidebar } = authSlice.actions;
-
 export default authSlice.reducer;

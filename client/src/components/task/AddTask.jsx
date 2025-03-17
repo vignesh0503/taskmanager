@@ -31,13 +31,14 @@ const AddTask = ({ open, setOpen, task }) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ defaultValues });
+  } = useForm({ defaultValues, mode: "onChange" });
 
   const [team, setTeam] = useState(task?.team || []);
   const [stage, setStage] = useState(task?.stage?.toUpperCase() || LISTS[0]);
   const [priority, setPriority] = useState(
     task?.priority?.toUpperCase() || PRIORITY[2]
   );
+
   const [assets, setAssets] = useState([]);
   const [uploading, setUploading] = useState(false);
 
@@ -45,22 +46,26 @@ const AddTask = ({ open, setOpen, task }) => {
   const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
 
   const handleSelect = (e) => {
-    setAssets(e.target.files); // Store selected files
+    setAssets(Array.from(e.target.files)); // Store selected files
   };
 
   const submitHandler = async (data) => {
     setUploading(true);
     try {
       const formData = new FormData();
-      for (const file of assets) {
-        formData.append("files", file);
-      }
+      // for (const file of assets) {
+      //   formData.append("files", file);
+      // }
+      assets.forEach((file) => formData.append("files", file));
 
       // Upload images to backend
-      const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const uploadRes = await fetch(
+        `${import.meta.env.VITE_APP_BASE_URL}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const { urls } = await uploadRes.json(); // Get uploaded file URLs
 
