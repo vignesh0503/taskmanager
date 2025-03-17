@@ -1,5 +1,5 @@
 import { apiSlice } from "../apiSlice";
-import { logout, setCredentials } from "../authSlice"; // ✅ Import logout
+import { logout, setCredentials } from "../authSlice"; //Import logout
 
 const AUTH_URL = "/user";
 
@@ -7,14 +7,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (data) => {
-        console.log("Sending Login Request:", data); // ✅ Debugging
+        console.log("Sending Login Request:", data); // Debugging
         return {
           url: `${AUTH_URL}/login`,
           method: "POST",
           body: data,
           credentials: "include",
           headers: {
-            "Content-Type": "application/json", // ✅ Ensure JSON format
+            "Content-Type": "application/json", // Ensure JSON format
           },
         };
       },
