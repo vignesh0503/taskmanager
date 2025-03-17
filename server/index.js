@@ -12,7 +12,7 @@ dotenv.config();
 dbConnection();
 
 const PORT = process.env.PORT || 5000;
-  
+
 const app = express();
 
 app.use(
@@ -37,5 +37,8 @@ app.use("/api", routes);
 
 app.use(routeNotFound);
 app.use(errorHandler);
+
+console.log("Registered Routes:");
+console.log(routes.stack.map((r) => r.route?.path));
 
 app.listen(PORT, () => console.log(`Server Listening on ${PORT}`));
