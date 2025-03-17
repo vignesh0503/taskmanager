@@ -1,17 +1,25 @@
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { GridFSBucket } from "mongodb";
+
+let gfs, gridfsBucket;
 
 const dbConnection = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log("MongoDB Connected");
 
-    console.log("DB connection established");
+    gridfsBucket = new GridFSBucket(conn.connection.db, {
+      bucketName: "uploads",
+    });
+
+    gfs = gridfsBucket; // Use the same instance
   } catch (error) {
-    console.log("DB Error: " + error);
+    console.error("MongoDB Connection Error:", error);
   }
 };
 
-export default dbConnection;
+export { dbConnection, gfs, gridfsBucket };
 
 export const createJWT = (res, userId) => {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {

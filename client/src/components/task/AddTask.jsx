@@ -66,6 +66,10 @@ const AddTask = ({ open, setOpen, task }) => {
         }
       );
 
+      if (!uploadRes.ok) {
+        throw new Error("File upload failed");
+      }
+
       // const { urls } = await uploadRes.json(); // Get uploaded file URLs
       const { fileId, filename } = await uploadRes.json();
       const newData = {
