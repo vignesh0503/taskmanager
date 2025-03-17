@@ -9,11 +9,13 @@ const router = express.Router();
 router.use("/user", userRoutes);
 router.use("/task", taskRoutes);
 
-// ✅ Corrected Upload Route (make sure this exists)
+// ✅ Ensure `/upload` is correctly registered
 router.post("/upload", upload.single("file"), uploadFile);
 router.get("/file/:filename", getFile);
 
-
+// Debug: Log routes
+router.stack.forEach((route) => {
+  console.log(route.route ? route.route.path : route.name);
+});
 
 export default router;
-

@@ -49,63 +49,61 @@ const AddTask = ({ open, setOpen, task }) => {
     setAssets(e.target.files); // Store selected files
   };
 
-const submitHandler = async (data) => {
-  setUploading(true);
-  try {
-    const formData = new FormData();
-    for (const file of assets) {
-      formData.append("file", file);
-    }
-
-    const uploadRes = await fetch(
-      `${import.meta.env.VITE_APP_BASE_URL}/api/upload`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    const uploadText = await uploadRes.text(); // Read raw response text
-    console.log("Raw Upload Response:", uploadText);
-
-    let uploadData;
+  const submitHandler = async (data) => {
+    setUploading(true);
     try {
-      uploadData = JSON.parse(uploadText); // Attempt to parse JSON
-    } catch (parseError) {
-      throw new Error("Upload response is not valid JSON");
+      const formData = new FormData();
+      for (const file of assets) {
+        formData.append("file", file);
+      }
+
+      const uploadRes = await fetch(
+        `${import.meta.env.VITE_APP_BASE_URL}/api/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const uploadText = await uploadRes.text(); // Read raw response text
+      console.log("Raw Upload Response:", uploadText);
+
+      let uploadData;
+      try {
+        uploadData = JSON.parse(uploadText); // Attempt to parse JSON
+      } catch (parseError) {
+        throw new Error("Upload response is not valid JSON");
+      }
+
+      console.log("Parsed Upload Response:", uploadData);
+
+      if (!uploadData.urls || !Array.isArray(uploadData.urls)) {
+        throw new Error("Invalid upload response format");
+      }
+
+      const newData = {
+        ...data,
+        assets: [...(task?.assets || []), ...uploadData.urls],
+        team,
+        stage,
+        priority,
+      };
+
+      const res = task?._id
+        ? await updateTask({ ...newData, _id: task._id }).unwrap()
+        : await createTask(newData).unwrap();
+
+      toast.success(res.message);
+      setTimeout(() => {
+        setOpen(false);
+      }, 500);
+    } catch (err) {
+      console.error("Error:", err);
+      toast.error(err?.data?.message || err.message);
+    } finally {
+      setUploading(false);
     }
-
-    console.log("Parsed Upload Response:", uploadData);
-
-    if (!uploadData.urls || !Array.isArray(uploadData.urls)) {
-      throw new Error("Invalid upload response format");
-    }
-
-    const newData = {
-      ...data,
-      assets: [...(task?.assets || []), ...uploadData.urls],
-      team,
-      stage,
-      priority,
-    };
-
-    const res = task?._id
-      ? await updateTask({ ...newData, _id: task._id }).unwrap()
-      : await createTask(newData).unwrap();
-
-    toast.success(res.message);
-    setTimeout(() => {
-      setOpen(false);
-    }, 500);
-  } catch (err) {
-    console.error("Error:", err);
-    toast.error(err?.data?.message || err.message);
-  } finally {
-    setUploading(false);
-  }
-};
-
-
+  };
 
   return (
     <ModalWrapper open={open} setOpen={setOpen}>
